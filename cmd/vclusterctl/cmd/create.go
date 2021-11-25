@@ -52,6 +52,7 @@ var baseArgsMap = map[string]string{
 }
 
 var errorMessageFind = "provided IP is not in the valid range. The range of valid IPs is "
+var errorMessageIPFamily = "expected an IPv6 value as indicated by "
 var replaceRegEx = regexp.MustCompile("[^0-9]+")
 
 // CreateCmd holds the login cmd flags
@@ -190,7 +191,11 @@ func (cmd *CreateCmd) Run(cobraCmd *cobra.Command, args []string) error {
 	}
 
 	// get service cidr
-	cidr, err := getServiceCIDR(client, namespace)
+	cidr, err := getServiceCIDR(client, namespace, false)
+	idx := strings.Index(err.Error(), errorMessageIPFamily)
+	if idx != -1 {
+		cidr, err = getServiceCIDR(client, namespace, true)
+	}
 	if err != nil {
 		cmd.log.Warn(err)
 		cidr = "10.96.0.0/12"
@@ -354,7 +359,12 @@ securityContext:
 	return values, nil
 }
 
-func getServiceCIDR(client kubernetes.Interface, namespace string) (string, error) {
+func getServiceCIDR(client kubernetes.Interface, namespace string, ipv6 bool) (string, error) {
+	clusterIP := "4.4.4.4"
+	if ipv6 {
+		// https://www.ietf.org/rfc/rfc3849.txt
+		clusterIP = "2001:DB8::1"
+	}
 	_, err := client.CoreV1().Services(namespace).Create(context.Background(), &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "test-service-",
@@ -365,7 +375,7 @@ func getServiceCIDR(client kubernetes.Interface, namespace string) (string, erro
 					Port: 80,
 				},
 			},
-			ClusterIP: "4.4.4.4",
+			ClusterIP: clusterIP,
 		},
 	}, metav1.CreateOptions{})
 	if err == nil {
