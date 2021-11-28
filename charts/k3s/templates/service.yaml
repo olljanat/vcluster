@@ -11,7 +11,11 @@ metadata:
 spec:
   ipFamilyPolicy: SingleStack
   ipFamilies:
-  - {{ .Values.service.ipFamily }}
+  {{- if .Values.ipv6 }}
+  - IPv6
+  {{- else }}
+  - IPv4
+  {{- end }}
   type: {{ .Values.service.type }}
   ports:
     - name: https

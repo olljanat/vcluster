@@ -9,6 +9,13 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+  {{- if .Values.ipv6 }}
+  - IPv6
+  {{- else }}
+  - IPv4
+  {{- end }}
   ports:
     - name: https
       port: 443
