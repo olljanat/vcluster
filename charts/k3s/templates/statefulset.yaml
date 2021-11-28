@@ -79,6 +79,13 @@ spec:
           {{- if .Values.serviceCIDR }}
           - --service-cidr={{ .Values.serviceCIDR }}
           {{- end }}
+          # {{- if .Values.ipv6 }}
+          # - '--advertise-address=::'
+          # - '--bind-address=::'
+          # {{- else }}
+          # - '--advertise-address=0.0.0.0'
+          # - '--bind-address=0.0.0.0'
+          # {{- end }}
           {{- range $f := .Values.vcluster.extraArgs }}
           - {{ $f | quote }}
           {{- end }}

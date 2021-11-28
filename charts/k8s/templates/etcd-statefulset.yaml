@@ -87,9 +87,15 @@ spec:
           - '--initial-cluster={{ range $index := untilStep 0 (int .Values.etcd.replicas) 1 }}{{ if (ne (int $index) 0) }},{{ end }}{{ $releaseName }}-etcd-{{ $index }}=https://{{ $releaseName }}-etcd-{{ $index }}.{{ $releaseName }}-etcd-headless.{{ $releaseNamespace }}:2380{{ end }}'
           - '--initial-cluster-token={{ .Release.Name }}'
           - '--initial-cluster-state=new'
+          {{- if .Values.ipv6 }}
+          - '--listen-client-urls=https://[::]:2379'
+          - '--listen-metrics-urls=http://[::]:2381'
+          - '--listen-peer-urls=https://[::]:2380'
+          {{- else }}
           - '--listen-client-urls=https://0.0.0.0:2379'
           - '--listen-metrics-urls=http://0.0.0.0:2381'
           - '--listen-peer-urls=https://0.0.0.0:2380'
+          {{- end }}
           - '--key-file=/run/config/pki/etcd-server.key'
           - '--name=$(NAME)'
           - '--peer-cert-file=/run/config/pki/etcd-peer.crt'

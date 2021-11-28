@@ -65,7 +65,13 @@ spec:
         image: "{{ .Values.api.image }}"
         command:
           - kube-apiserver
+          {{- if .Values.ipv6 }}
+          - '--advertise-address=::'
+          - '--bind-address=::'
+          {{- else }}
           - '--advertise-address=0.0.0.0'
+          - '--bind-address=0.0.0.0'
+          {{- end }}
           - '--allow-privileged=true'
           - '--authorization-mode=Node,RBAC'
           - '--client-ca-file=/run/config/pki/ca.crt'

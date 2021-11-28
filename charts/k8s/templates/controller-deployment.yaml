@@ -67,7 +67,11 @@ spec:
           - kube-controller-manager
           - '--authentication-kubeconfig=/run/config/pki/controller-manager.conf'
           - '--authorization-kubeconfig=/run/config/pki/controller-manager.conf'
+          {{- if .Values.ipv6 }}
+          - '--bind-address=::'
+          {{- else }}
           - '--bind-address=0.0.0.0'
+          {{- end }}
           - '--client-ca-file=/run/config/pki/ca.crt'
           - '--cluster-name=kubernetes'
           - '--cluster-signing-cert-file=/run/config/pki/ca.crt'
