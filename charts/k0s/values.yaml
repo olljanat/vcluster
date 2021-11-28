@@ -107,6 +107,7 @@ annotations: {}
 
 # Service configurations
 service:
+  ipFamily: IPv4
   type: ClusterIP
 
 # Configure the ingress resource that allows you to access the vcluster

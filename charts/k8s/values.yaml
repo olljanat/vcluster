@@ -136,6 +136,7 @@ rbac:
 
 # Service configurations
 service:
+  ipFamily: IPv4
   type: ClusterIP
   
 # PreInstall hook configuration

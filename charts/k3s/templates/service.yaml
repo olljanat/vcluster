@@ -9,6 +9,9 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+  - {{ .Values.service.ipFamily }}
   type: {{ .Values.service.type }}
   ports:
     - name: https

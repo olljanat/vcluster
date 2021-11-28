@@ -10,6 +10,9 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+  - {{ .Values.service.ipFamily }}
   ports:
     - name: etcd
       port: 2379
