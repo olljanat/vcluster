@@ -38,11 +38,12 @@ type NodeServiceProvider interface {
 	GetNodeIP(ctx context.Context, name types.NamespacedName) (string, error)
 }
 
-func NewNodeServiceProvider(localClient client.Client, virtualClient client.Client, uncachedVirtualClient client.Client, targetNamespace string) NodeServiceProvider {
+func NewNodeServiceProvider(localClient client.Client, virtualClient client.Client, uncachedVirtualClient client.Client, currentNamespace string, targetNamespace string) NodeServiceProvider {
 	return &nodeServiceProvider{
 		localClient:           localClient,
 		virtualClient:         virtualClient,
 		uncachedVirtualClient: uncachedVirtualClient,
+		currentNamespace:      currentNamespace,
 		targetNamespace:       targetNamespace,
 	}
 }
@@ -52,6 +53,7 @@ type nodeServiceProvider struct {
 	virtualClient         client.Client
 	uncachedVirtualClient client.Client
 
+	currentNamespace string
 	targetNamespace string
 	serviceMutex    sync.Mutex
 }
@@ -139,7 +141,7 @@ func (n *nodeServiceProvider) GetNodeIP(ctx context.Context, name types.Namespac
 
 	// find out the labels to select ourself
 	pod := &corev1.Pod{}
-	err = n.localClient.Get(ctx, types.NamespacedName{Name: podName, Namespace: n.targetNamespace}, pod)
+	err = n.localClient.Get(ctx, types.NamespacedName{Name: podName, Namespace: n.currentNamespace}, pod)
 	if err != nil {
 		return "", errors.Wrap(err, "get pod")
 	} else if len(pod.Labels) == 0 {

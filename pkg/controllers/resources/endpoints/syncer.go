@@ -38,6 +38,7 @@ func Register(ctx *context2.ControllerContext, eventBroadcaster record.EventBroa
 	return generic.RegisterSyncer(ctx, "endpoints", &syncer{
 		Translator: generic.NewNamespacedTranslator(ctx.Options.TargetNamespace, ctx.VirtualManager.GetClient(), &corev1.Endpoints{}),
 
+		currentNamespace: ctx.Options.CurrentNamespace,
 		targetNamespace:  ctx.Options.TargetNamespace,
 		serviceName:      ctx.Options.ServiceName,
 		serviceNamespace: ctx.Options.ServiceNamespace,
@@ -51,6 +52,7 @@ func Register(ctx *context2.ControllerContext, eventBroadcaster record.EventBroa
 
 type syncer struct {
 	generic.Translator
+	currentNamespace string
 	targetNamespace string
 
 	serviceName      string

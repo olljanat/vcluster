@@ -27,6 +27,7 @@ type VirtualClusterOptions struct {
 
 	Suffix               string
 	DisableSyncResources string
+	CurrentNamespace     string
 	TargetNamespace      string
 	ServiceName          string
 	ServiceNamespace     string
@@ -88,7 +89,7 @@ func NewControllerContext(localManager ctrl.Manager, virtualManager ctrl.Manager
 		Context:             ctx,
 		LocalManager:        localManager,
 		VirtualManager:      virtualManager,
-		NodeServiceProvider: nodeservice.NewNodeServiceProvider(localManager.GetClient(), virtualManager.GetClient(), uncachedVirtualClient, options.TargetNamespace),
+		NodeServiceProvider: nodeservice.NewNodeServiceProvider(localManager.GetClient(), virtualManager.GetClient(), uncachedVirtualClient, options.CurrentNamespace, options.TargetNamespace),
 		LockFactory:         locks.NewDefaultLockFactory(),
 		CacheSynced: func() {
 			cacheSynced.Do(func() {

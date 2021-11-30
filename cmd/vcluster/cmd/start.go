@@ -179,6 +179,7 @@ func ExecuteStart(options *context2.VirtualClusterOptions) error {
 	if err != nil {
 		return err
 	}
+	options.CurrentNamespace = currentNamespace
 
 	// ensure target namespace
 	if options.TargetNamespace == "" {
