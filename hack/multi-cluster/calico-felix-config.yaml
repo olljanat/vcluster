@@ -1,0 +1,14 @@
+apiVersion: crd.projectcalico.org/v1
+kind: FelixConfiguration
+metadata:
+  name: default
+spec:
+  bpfLogLevel: ""
+  ipipEnabled: true
+  logSeverityScreen: Info
+  reportingInterval: 0s
+  # By default Calico enables service loop prevention when
+  # https://projectcalico.docs.tigera.io/networking/advertise-service-ips
+  # is enabled. However here we use same service CIDR on all host clusters
+  # in purpose which why we need to disable
+  serviceLoopPrevention: Disabled

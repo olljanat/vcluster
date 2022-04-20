@@ -11,6 +11,9 @@ kubectl --context kind-host-cluster-2 apply -f https://docs.projectcalico.org/v3
 kind create cluster --config kind-cluster3.yaml
 kubectl --context kind-host-cluster-3 apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
 
+kubectl --context kind-host-cluster-1 apply -f calico-felix-config.yaml
+kubectl --context kind-host-cluster-2 apply -f calico-felix-config.yaml
+kubectl --context kind-host-cluster-3 apply -f calico-felix-config.yaml
 
 echo
 echo "Setting global BGP configuration to Calico"
@@ -21,6 +24,8 @@ metadata:
   name: default
 spec:
   asNumber: 65001
+  serviceClusterIPs:
+  - cidr: 10.96.0.0/12
 EOF
 cat << EOF > temp-bgp-config-2.yaml
 apiVersion: crd.projectcalico.org/v1
@@ -29,6 +34,8 @@ metadata:
   name: default
 spec:
   asNumber: 65002
+  serviceClusterIPs:
+  - cidr: 10.96.0.0/12
 EOF
 cat << EOF > temp-bgp-config-3.yaml
 apiVersion: crd.projectcalico.org/v1
@@ -37,6 +44,8 @@ metadata:
   name: default
 spec:
   asNumber: 65003
+  serviceClusterIPs:
+  - cidr: 10.96.0.0/12
 EOF
 kubectl --context kind-host-cluster-1 apply -f temp-bgp-config-1.yaml
 kubectl --context kind-host-cluster-2 apply -f temp-bgp-config-2.yaml
