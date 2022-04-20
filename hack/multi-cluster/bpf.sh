@@ -39,5 +39,9 @@ kubectl --context kind-host-cluster-1 apply -f temp-calico-endpoint1.yaml
 kubectl --context kind-host-cluster-2 apply -f temp-calico-endpoint2.yaml
 kubectl --context kind-host-cluster-3 apply -f temp-calico-endpoint3.yaml
 
+sleep 60s
+
 kubectl delete pod -n kube-system -l k8s-app=calico-node
 kubectl delete pod -n kube-system -l k8s-app=calico-kube-controllers
+
+sleep 60s

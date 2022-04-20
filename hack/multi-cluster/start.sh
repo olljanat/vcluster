@@ -15,6 +15,8 @@ kubectl --context kind-host-cluster-1 apply -f calico-felix-config.yaml
 kubectl --context kind-host-cluster-2 apply -f calico-felix-config.yaml
 kubectl --context kind-host-cluster-3 apply -f calico-felix-config.yaml
 
+./bpf.sh
+
 echo
 echo "Setting global BGP configuration to Calico"
 cat << EOF > temp-bgp-config-1.yaml
@@ -117,5 +119,4 @@ echo
 echo "Testing ping from $tools3pod ($tools3ip) to $tools1pod ($tools1ip)"
 kubectl --context kind-host-cluster-3 exec -it $tools3pod -- ping -c 1 $tools1ip
 
-./bpf.sh
 ./dns.sh
