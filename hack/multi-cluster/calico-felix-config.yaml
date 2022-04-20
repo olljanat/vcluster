@@ -3,7 +3,9 @@ kind: FelixConfiguration
 metadata:
   name: default
 spec:
+  bpfEnabled: true
   bpfLogLevel: ""
+  bpfExternalServiceMode: DSR
   ipipEnabled: true
   logSeverityScreen: Info
   reportingInterval: 0s

@@ -3,13 +3,13 @@
 echo
 echo "Creating clusters"
 kind create cluster --config kind-cluster1.yaml
-kubectl --context kind-host-cluster-1 apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
+kubectl --context kind-host-cluster-1 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
 
 kind create cluster --config kind-cluster2.yaml
-kubectl --context kind-host-cluster-2 apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
+kubectl --context kind-host-cluster-2 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
 
 kind create cluster --config kind-cluster3.yaml
-kubectl --context kind-host-cluster-3 apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml
+kubectl --context kind-host-cluster-3 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
 
 kubectl --context kind-host-cluster-1 apply -f calico-felix-config.yaml
 kubectl --context kind-host-cluster-2 apply -f calico-felix-config.yaml
@@ -116,3 +116,6 @@ kubectl --context kind-host-cluster-2 exec -it $tools2pod -- ping -c 1 $tools3ip
 echo
 echo "Testing ping from $tools3pod ($tools3ip) to $tools1pod ($tools1ip)"
 kubectl --context kind-host-cluster-3 exec -it $tools3pod -- ping -c 1 $tools1ip
+
+./bpf.sh
+./dns.sh

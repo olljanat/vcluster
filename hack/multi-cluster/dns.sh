@@ -128,18 +128,13 @@ kubectl --context kind-host-cluster-3 -n kube-system apply -f temp-coredns3.yaml
 echo
 echo "Starting test services"
 kubectl --context kind-host-cluster-1 create deployment web --image=bitnami/nginx
-kubectl --context kind-host-cluster-1 create service clusterip web --tcp=8080:8080
+kubectl --context kind-host-cluster-1 apply -f service_web.yaml
 kubectl --context kind-host-cluster-2 create deployment web --image=bitnami/nginx
-kubectl --context kind-host-cluster-2 create service clusterip web --tcp=8080:8080
+kubectl --context kind-host-cluster-2 apply -f service_web.yaml
 kubectl --context kind-host-cluster-3 create deployment web --image=bitnami/nginx
-kubectl --context kind-host-cluster-3 create service clusterip web --tcp=8080:8080
+kubectl --context kind-host-cluster-3 apply -f service_web.yaml
 
 
 calico1pod=$(kubectl --context kind-host-cluster-1 -n kube-system get pods -l k8s-app=calico-node -o name)
 calico2pod=$(kubectl --context kind-host-cluster-2 -n kube-system get pods -l k8s-app=calico-node -o name)
 calico3pod=$(kubectl --context kind-host-cluster-3 -n kube-system get pods -l k8s-app=calico-node -o name)
-
-
-# kubectl --context kind-host-cluster-1 -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
-# kubectl --context kind-host-cluster-2 -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
-# kubectl --context kind-host-cluster-3 -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
