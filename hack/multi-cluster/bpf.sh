@@ -41,6 +41,3 @@ kubectl --context kind-host-cluster-3 apply -f temp-calico-endpoint3.yaml
 
 kubectl delete pod -n kube-system -l k8s-app=calico-node
 kubectl delete pod -n kube-system -l k8s-app=calico-kube-controllers
-
-
-# TODO: Restart calico-node and coredns pods on this point
