@@ -10,6 +10,7 @@ import (
 	utilpointer "k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -97,8 +98,16 @@ func (r *DefaultSecurityContextWebhook) SetupWithManager(mgr ctrl.Manager) error
 		return fmt.Errorf("unable to setup default security context controller: %v", err)
 	}
 
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up health check for default security context controller: %v", err)
+	}
+
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up ready check for default security context controller: %v", err)
+	}
+
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		return fmt.Errorf("unable to rung manager for default security context controller: %v", err)
+		return fmt.Errorf("unable to run manager for default security context controller: %v", err)
 	}
 	return nil
 }
