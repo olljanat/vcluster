@@ -222,7 +222,7 @@ func registerPodSecurityController(ctx *context.ControllerContext) error {
 }
 
 func registerDefaultSecurityContextController(ctx *context.ControllerContext) error {
-	controller := &defaultsecuritycontext.DefaultSecurityContextReconciler{
+	controller := &defaultsecuritycontext.DefaultSecurityContextWebhook{
 		Client: ctx.VirtualManager.GetClient(),
 		Log:    loghelper.New("default-security-context-controller"),
 	}

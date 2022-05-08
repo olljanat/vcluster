@@ -2,25 +2,51 @@ package defaultsecuritycontext
 
 import (
 	"context"
-	"time"
+	"fmt"
 
 	"github.com/loft-sh/vcluster/pkg/util/loghelper"
 	corev1 "k8s.io/api/core/v1"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	utilpointer "k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-type DefaultSecurityContextReconciler struct {
+type DefaultSecurityContextWebhook struct {
 	client.Client
 	DefaultSecurityContextStandard string
 	Log                            loghelper.Logger
 }
 
-func (r *DefaultSecurityContextReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+var _ admission.CustomDefaulter = &DefaultSecurityContextWebhook{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (r *DefaultSecurityContextWebhook) Default(ctx context.Context, obj runtime.Object) error {
+	pod := obj.(*corev1.Pod)
+
+	for i, container := range pod.Spec.Containers {
+		if container.SecurityContext == nil {
+			pod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
+				AllowPrivilegeEscalation: utilpointer.Bool(false),
+				Capabilities: &corev1.Capabilities{
+					Drop: []corev1.Capability{"ALL"},
+					Add:  []corev1.Capability{"NET_BIND_SERVICE"},
+				},
+				RunAsNonRoot: utilpointer.Bool(false),
+				RunAsUser:    utilpointer.Int64(65534),
+				SeccompProfile: &corev1.SeccompProfile{
+					Type: corev1.SeccompProfileTypeRuntimeDefault,
+				},
+			}
+			r.Log.Infof(`add default security context to container "%s on pod %s"`, container.Name, pod.Name)
+		}
+	}
+	return nil
+}
+
+/*
+func (r *DefaultSecurityContextWebhook) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	client := r.Client
 	pod := &corev1.Pod{}
 	err := client.Get(ctx, req.NamespacedName, pod)
@@ -60,20 +86,19 @@ func (r *DefaultSecurityContextReconciler) Reconcile(ctx context.Context, req ct
 
 	return ctrl.Result{}, nil
 }
+*/
 
-// SetupWithManager adds the controller to the manager
-func (r *DefaultSecurityContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		Named("default_security_context").
+func (r *DefaultSecurityContextWebhook) SetupWithManager(mgr ctrl.Manager) error {
+	err := ctrl.NewWebhookManagedBy(mgr).
 		For(&corev1.Pod{}).
-		// Suppress Delete and Update events because security context can be only updated during Pod creation
-		WithEventFilter(predicate.Funcs{
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				return false
-			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				return false
-			},
-		}).
-		Complete(r)
+		WithDefaulter(&DefaultSecurityContextWebhook{}).
+		Complete()
+	if err != nil {
+		return fmt.Errorf("unable to setup default security context controller: %v", err)
+	}
+
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		return fmt.Errorf("unable to rung manager for default security context controller: %v", err)
+	}
+	return nil
 }
