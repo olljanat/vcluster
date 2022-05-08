@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/util/workqueue"
-	utilpointer "k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -302,25 +301,27 @@ func (s *podSyncer) Sync(ctx *synccontext.SyncContext, pObj client.Object, vObj 
 	}
 
 	// Include default securityContext
-	if s.podSecurityStandard == "restricted" {
-		for i := range pPod.Spec.Containers {
-			if pPod.Spec.Containers[i].SecurityContext == nil {
-				pPod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
-					AllowPrivilegeEscalation: utilpointer.Bool(false),
-					Capabilities: &corev1.Capabilities{
-						Drop: []corev1.Capability{"ALL"},
-						Add:  []corev1.Capability{"NET_BIND_SERVICE"},
-					},
-					RunAsNonRoot: utilpointer.Bool(false),
-					RunAsUser:    utilpointer.Int64(65534),
-					SeccompProfile: &corev1.SeccompProfile{
-						Type: corev1.SeccompProfileTypeRuntimeDefault,
-					},
+	/*
+		if s.podSecurityStandard == "restricted" {
+			for i := range pPod.Spec.Containers {
+				if pPod.Spec.Containers[i].SecurityContext == nil {
+					pPod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
+						AllowPrivilegeEscalation: utilpointer.Bool(false),
+						Capabilities: &corev1.Capabilities{
+							Drop: []corev1.Capability{"ALL"},
+							Add:  []corev1.Capability{"NET_BIND_SERVICE"},
+						},
+						RunAsNonRoot: utilpointer.Bool(false),
+						RunAsUser:    utilpointer.Int64(65534),
+						SeccompProfile: &corev1.SeccompProfile{
+							Type: corev1.SeccompProfileTypeRuntimeDefault,
+						},
+					}
+					ctx.Log.Infof("add default security context to container %s in pod %s", pPod.Spec.Containers[i].Name, pPod.Name)
 				}
-				ctx.Log.Infof("add default security context to container %s in pod %s", pPod.Spec.Containers[i].Name, pPod.Name)
 			}
 		}
-	}
+	*/
 
 	// validate virtual pod before syncing it to the host cluster
 	if s.podSecurityStandard != "" {
