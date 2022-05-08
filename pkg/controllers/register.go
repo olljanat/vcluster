@@ -136,12 +136,12 @@ func RegisterControllers(ctx *context.ControllerContext, syncers []syncer.Object
 	}
 
 	// FixMe: Add description here
-	if ctx.Options.EnforcePodSecurityStandard == "restricted" {
-		err := registerDefaultSecurityContextController(ctx)
-		if err != nil {
-			return err
-		}
+	// if ctx.Options.EnforcePodSecurityStandard == "restricted" {
+	err = registerDefaultSecurityContextController(ctx)
+	if err != nil {
+		return err
 	}
+	// }
 
 	// register controller that keeps CoreDNS NodeHosts config up to date
 	err = registerCoreDNSController(ctx)

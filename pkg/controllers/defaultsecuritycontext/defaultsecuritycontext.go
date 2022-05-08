@@ -10,6 +10,8 @@ import (
 	utilpointer "k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 type DefaultSecurityContextReconciler struct {
@@ -62,7 +64,16 @@ func (r *DefaultSecurityContextReconciler) Reconcile(ctx context.Context, req ct
 // SetupWithManager adds the controller to the manager
 func (r *DefaultSecurityContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		Named("pod_security").
+		Named("default_security_context").
 		For(&corev1.Pod{}).
+		// Suppress Delete and Update events because security context can be only updated during Pod creation
+		WithEventFilter(predicate.Funcs{
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				return false
+			},
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				return false
+			},
+		}).
 		Complete(r)
 }
