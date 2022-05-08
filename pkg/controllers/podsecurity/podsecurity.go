@@ -65,7 +65,10 @@ func (r *PodSecurityReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if isPod == true {
 		for _, container := range pod.Spec.Containers {
-			r.Log.Infof(`add default security context to container "%s on pod %d"`, container.Name, pod.Name)
+			securityContext := container.SecurityContext
+			if securityContext == nil {
+				r.Log.Infof(`add default security context to container "%s on pod %d"`, container.Name, pod.Name)
+			}
 		}
 	}
 

@@ -192,7 +192,7 @@ spec:
         {{- if .Values.coredns.enabled }}
           - name: coredns
             mountPath: /manifests/coredns
-            readOnly: true
+            readOnly: false
         {{- end }}
 {{ toYaml .Values.syncer.volumeMounts | indent 10 }}
         resources:

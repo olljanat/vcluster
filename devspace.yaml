@@ -58,6 +58,9 @@ deployments:
           enabled: true
           podSecurityStandard: restricted
           defaultSecurityContext: true
+        sync:
+          persistentvolumeclaims:
+            enabled: false
 dev:
   terminal:
     imageSelector: ${SYNCER_IMAGE}
