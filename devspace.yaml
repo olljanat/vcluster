@@ -24,7 +24,7 @@ deployments:
       values:
         serviceCIDR: ${SERVICE_CIDR}
         coredns:
-          replicas: 1
+          enabled: false
         etcd:
           replicas: 1
         api:
