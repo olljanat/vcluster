@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/util/workqueue"
+	utilpointer "k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -209,6 +210,18 @@ func (s *podSyncer) SyncDown(ctx *synccontext.SyncContext, vObj client.Object) (
 	// if scheduler is enabled we only sync if the pod has a node name
 	if s.enableScheduler && pPod.Spec.NodeName == "" {
 		return ctrl.Result{}, nil
+	}
+
+	// add security context
+	for i, _ := range pPod.Spec.Containers {
+		if pPod.Spec.Containers[i].SecurityContext == nil {
+			newSecurityContext := &corev1.SecurityContext{
+				AllowPrivilegeEscalation: utilpointer.Bool(false),
+			}
+			pPod.Spec.Containers[i].SecurityContext = newSecurityContext
+
+			ctx.Log.Infof("add default security context to container %s on pod %s", pPod.Spec.Containers[i].Name, pPod.Name)
+		}
 	}
 
 	return s.SyncDownCreate(ctx, vPod, pPod)
