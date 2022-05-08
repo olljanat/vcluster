@@ -10,6 +10,7 @@ import (
 
 	"github.com/loft-sh/vcluster/cmd/vcluster/context"
 	"github.com/loft-sh/vcluster/pkg/controllers/coredns"
+	"github.com/loft-sh/vcluster/pkg/controllers/defaultsecuritycontext"
 	"github.com/loft-sh/vcluster/pkg/controllers/podsecurity"
 	"github.com/loft-sh/vcluster/pkg/controllers/resources/configmaps"
 	"github.com/loft-sh/vcluster/pkg/controllers/resources/endpoints"
@@ -134,6 +135,14 @@ func RegisterControllers(ctx *context.ControllerContext, syncers []syncer.Object
 		}
 	}
 
+	// FixMe: Add description here
+	if ctx.Options.EnforcePodSecurityStandard == "restricted" {
+		err := registerDefaultSecurityContextController(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	// register controller that keeps CoreDNS NodeHosts config up to date
 	err = registerCoreDNSController(ctx)
 	if err != nil {
@@ -208,6 +217,18 @@ func registerPodSecurityController(ctx *context.ControllerContext) error {
 	err := controller.SetupWithManager(ctx.VirtualManager)
 	if err != nil {
 		return fmt.Errorf("unable to setup pod security controller: %v", err)
+	}
+	return nil
+}
+
+func registerDefaultSecurityContextController(ctx *context.ControllerContext) error {
+	controller := &defaultsecuritycontext.DefaultSecurityContextReconciler{
+		Client: ctx.VirtualManager.GetClient(),
+		Log:    loghelper.New("default-security-context-controller"),
+	}
+	err := controller.SetupWithManager(ctx.VirtualManager)
+	if err != nil {
+		return fmt.Errorf("unable to setup default security context controller: %v", err)
 	}
 	return nil
 }
