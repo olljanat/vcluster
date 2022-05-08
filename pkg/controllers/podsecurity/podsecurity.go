@@ -20,31 +20,53 @@ type PodSecurityReconciler struct {
 
 func (r *PodSecurityReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	client := r.Client
+
 	ns := &corev1.Namespace{}
 	err := client.Get(ctx, req.NamespacedName, ns)
+	isNamespace := true
 	if err != nil {
 		if kerrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{RequeueAfter: time.Second}, err
-	}
-
-	labels := ns.GetLabels()
-	if labels == nil {
-		labels = make(map[string]string)
-	}
-
-	if v, ok := labels[api.EnforceLevelLabel]; !ok || v != r.PodSecurityStandard {
-		labels[api.EnforceLevelLabel] = r.PodSecurityStandard
-		labels[api.EnforceVersionLabel] = api.VersionLatest
-		labels[api.WarnLevelLabel] = r.PodSecurityStandard
-		labels[api.WarnVersionLabel] = api.VersionLatest
-		ns.SetLabels(labels)
-		err = client.Update(ctx, ns)
-		if err != nil {
+			isNamespace = false
+		} else {
 			return ctrl.Result{RequeueAfter: time.Second}, err
 		}
-		r.Log.Infof(`enforcing pod security standard "%s" on namespace "%s"`, r.PodSecurityStandard, ns.Name)
+	}
+
+	pod := &corev1.Pod{}
+	err = client.Get(ctx, req.NamespacedName, pod)
+	isPod := true
+	if err != nil {
+		if kerrors.IsNotFound(err) {
+			isPod = false
+		} else {
+			return ctrl.Result{RequeueAfter: time.Second}, err
+		}
+	}
+
+	if isNamespace == true {
+		labels := ns.GetLabels()
+		if labels == nil {
+			labels = make(map[string]string)
+		}
+
+		if v, ok := labels[api.EnforceLevelLabel]; !ok || v != r.PodSecurityStandard {
+			labels[api.EnforceLevelLabel] = r.PodSecurityStandard
+			labels[api.EnforceVersionLabel] = api.VersionLatest
+			labels[api.WarnLevelLabel] = r.PodSecurityStandard
+			labels[api.WarnVersionLabel] = api.VersionLatest
+			ns.SetLabels(labels)
+			err = client.Update(ctx, ns)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: time.Second}, err
+			}
+			r.Log.Infof(`enforcing pod security standard "%s" on namespace "%s"`, r.PodSecurityStandard, ns.Name)
+		}
+	}
+
+	if isPod == true {
+		for _, container := range pod.Spec.Containers {
+			r.Log.Infof(`add default security context to container "%s on pod %d"`, container.Name, pod.Name)
+		}
 	}
 
 	return ctrl.Result{}, nil
