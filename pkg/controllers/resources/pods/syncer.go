@@ -302,37 +302,20 @@ func (s *podSyncer) Sync(ctx *synccontext.SyncContext, pObj client.Object, vObj 
 	}
 
 	// Include default securityContext
-	securitContextAdded := false
-	for i := range pPod.Spec.Containers {
-		if pPod.Spec.Containers[i].SecurityContext == nil {
-			pPod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
-				AllowPrivilegeEscalation: utilpointer.Bool(false),
-				RunAsNonRoot:             utilpointer.Bool(false),
-				RunAsUser:                utilpointer.Int64(65534),
-				SeccompProfile: &corev1.SeccompProfile{
-					Type: corev1.SeccompProfileTypeRuntimeDefault,
-				},
+	if s.podSecurityStandard == "restricted" {
+		for i := range pPod.Spec.Containers {
+			if pPod.Spec.Containers[i].SecurityContext == nil {
+				pPod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
+					AllowPrivilegeEscalation: utilpointer.Bool(false),
+					RunAsNonRoot:             utilpointer.Bool(false),
+					RunAsUser:                utilpointer.Int64(65534),
+					SeccompProfile: &corev1.SeccompProfile{
+						Type: corev1.SeccompProfileTypeRuntimeDefault,
+					},
+				}
+				ctx.Log.Infof("add default security context to container %s in pod %s", pPod.Spec.Containers[i].Name, pPod.Name)
 			}
-			securitContextAdded = true
-			ctx.Log.Infof("add default security context to container %s on pod %s", pPod.Spec.Containers[i].Name, pPod.Name)
 		}
-	}
-
-	if securitContextAdded == true {
-		newPod := vPod.DeepCopy()
-		for i, pContainer := range pPod.Spec.Containers {
-			newPod.Spec.Containers[i].SecurityContext = pContainer.SecurityContext
-		}
-		ctx.Log.Infof("update virtual pod %s/%s, because security context has changed", vPod.Namespace, vPod.Name)
-		err := ctx.VirtualClient.Status().Update(ctx.Context, newPod)
-		if err != nil {
-			if !kerrors.IsConflict(err) {
-				s.EventRecorder().Eventf(vObj, "Warning", "SyncError", "Error updating pod: %v", err)
-			}
-
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
 	}
 
 	// validate virtual pod before syncing it to the host cluster
