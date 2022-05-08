@@ -2,9 +2,10 @@ package pods
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"reflect"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/loft-sh/vcluster/pkg/controllers/syncer"
 	synccontext "github.com/loft-sh/vcluster/pkg/controllers/syncer/context"
@@ -283,6 +284,14 @@ func (s *podSyncer) Sync(ctx *synccontext.SyncContext, pObj client.Object, vObj 
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
+	}
+
+	// Include default securityContext
+	for _, container := range vPod.Spec.Containers {
+		*container.SecurityContext.AllowPrivilegeEscalation = false
+		*container.SecurityContext.RunAsNonRoot = true
+		*container.SecurityContext.RunAsUser = 65534
+		// *container.SecurityContext.SeccompProfile.Type = &SeccompProfile{}
 	}
 
 	// validate virtual pod before syncing it to the host cluster
