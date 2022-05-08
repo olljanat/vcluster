@@ -307,8 +307,12 @@ func (s *podSyncer) Sync(ctx *synccontext.SyncContext, pObj client.Object, vObj 
 			if pPod.Spec.Containers[i].SecurityContext == nil {
 				pPod.Spec.Containers[i].SecurityContext = &corev1.SecurityContext{
 					AllowPrivilegeEscalation: utilpointer.Bool(false),
-					RunAsNonRoot:             utilpointer.Bool(false),
-					RunAsUser:                utilpointer.Int64(65534),
+					Capabilities: &corev1.Capabilities{
+						Drop: []corev1.Capability{"ALL"},
+						Add:  []corev1.Capability{"NET_BIND_SERVICE"},
+					},
+					RunAsNonRoot: utilpointer.Bool(false),
+					RunAsUser:    utilpointer.Int64(65534),
 					SeccompProfile: &corev1.SeccompProfile{
 						Type: corev1.SeccompProfileTypeRuntimeDefault,
 					},
