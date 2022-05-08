@@ -287,12 +287,17 @@ func (s *podSyncer) Sync(ctx *synccontext.SyncContext, pObj client.Object, vObj 
 	}
 
 	// Include default securityContext
-	for _, container := range vPod.Spec.Containers {
-		*container.SecurityContext.AllowPrivilegeEscalation = false
-		*container.SecurityContext.RunAsNonRoot = true
-		*container.SecurityContext.RunAsUser = 65534
-		// *container.SecurityContext.SeccompProfile.Type = &SeccompProfile{}
-	}
+	/*
+		for _, container := range vPod.Spec.Containers {
+			*container.Name = "testing"
+
+			*container.SecurityContext.AllowPrivilegeEscalation = false
+			*container.SecurityContext.RunAsNonRoot = true
+			*container.SecurityContext.RunAsUser = 65534
+
+			 *container.SecurityContext.SeccompProfile.Type = &SeccompProfile{}
+		}
+	*/
 
 	// validate virtual pod before syncing it to the host cluster
 	if s.podSecurityStandard != "" {

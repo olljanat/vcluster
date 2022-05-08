@@ -1,7 +1,7 @@
 version: v1beta11
 vars:
   - name: SYNCER_IMAGE
-    value: ghcr.io/loft-sh/loft-enterprise/dev-vcluster
+    value: docker.io/ollijanatuinen/dev-vcluster
   - name: K3S_IMAGE
     value: rancher/k3s:v1.23.5-k3s1
   # Replace this with your clusters service CIDR, you can find it out via
@@ -24,14 +24,14 @@ deployments:
       values:
         serviceCIDR: ${SERVICE_CIDR}
         coredns:
-          replicas: 3
+          replicas: 1
         etcd:
-          replicas: 3
+          replicas: 1
         api:
-          replicas: 3
+          replicas: 1
         controller:
-          replicas: 3
-        enableHA: true
+          replicas: 1
+        enableHA: false
         tolerations:
           - operator: "Exists"
         serviceAccount:
@@ -54,6 +54,10 @@ deployments:
           workingDir: /vcluster-dev
           command: ["sleep"]
           extraArgs: ["99999999999"]
+        isolation:
+          enabled: true
+          podSecurityStandard: restricted
+          defaultSecurityContext: true
 dev:
   terminal:
     imageSelector: ${SYNCER_IMAGE}

@@ -144,6 +144,9 @@ spec:
           {{- if .Values.isolation.enabled }}
           - --enforce-pod-security-standard={{ .Values.isolation.podSecurityStandard }}
           {{- end}}
+          {{- if .Values.isolation.enabled }}
+          - --default-security-context={{ .Values.isolation.defaultSecurityContext }}
+          {{- end}}
           {{- include "vcluster.syncer.syncArgs" . | indent 10 }}
           {{- if .Values.sync.nodes.syncAllNodes }}
           - --sync-all-nodes
