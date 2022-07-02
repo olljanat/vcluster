@@ -38,6 +38,23 @@ spec:
   policyTypes:
     - Egress
 ---
+# Allows all traffic between vcluster workloads unless zero trust mode is enabled
+# In addition this will allow all traffic from workloads to control plane unless
+# --target-namespace is configured
+{{- if not .Values.isolation.networkPolicy.zeroTrust.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-ingress
+  namespace: {{ .Values.isolation.namespace | default .Release.Namespace }}
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress
+{{- end }}
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -67,4 +84,27 @@ spec:
               k8s-app: kube-dns
   policyTypes:
     - Egress
+---
+# Allows incoming connections to vcluster from outside of it
+{{- if and .Values.isolation.networkPolicy.incomingConnections.vclusterAllow.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-ingress-control-plane
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: {{ .Values.isolation.networkPolicy.incomingConnections.vclusterAllow.ipBlock.cidr }}
+            except:
+              {{- range .Values.isolation.networkPolicy.incomingConnections.vclusterAllow.ipBlock.except }}
+              - {{ . }}
+              {{- end }}
+      ports:
+        - port: 8443
+  policyTypes:
+  - Ingress
+{{- end }}
 {{- end }}

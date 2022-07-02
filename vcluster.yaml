@@ -1,0 +1,103 @@
+# vcluster create -n vcluster-test --distro k8s --extra-values vcluster.yaml test
+# kubectl config use-context kind-kind
+#
+# helm -n vcluster-test-k8s install test . --values ~/vcluster/vcluster.yaml
+
+serviceCIDR: "10.43.0.0/16"
+
+enableHA: true
+
+syncer:
+  image: loftsh/vcluster:0.10.2
+  replicas: 3
+  # extraArgs:
+  #   - --target-namespace=vcluster-test
+  kubeConfigContextName: ""
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsGroup: 12345
+    runAsNonRoot: true
+    runAsUser: 12345
+    seccompProfile:
+      type: RuntimeDefault
+
+etcd:
+  image: k8s.gcr.io/etcd:3.5.1-0
+  replicas: 3
+  fsGroup: 12345
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsGroup: 12345
+    runAsNonRoot: true
+    runAsUser: 12345
+    seccompProfile:
+      type: RuntimeDefault
+
+controller:
+  image: k8s.gcr.io/kube-controller-manager:v1.24.1
+  replicas: 3
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsGroup: 12345
+    runAsNonRoot: true
+    runAsUser: 12345
+    seccompProfile:
+      type: RuntimeDefault
+
+api:
+  image: k8s.gcr.io/kube-apiserver:v1.24.1
+  replicas: 3
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+      add:
+      - NET_BIND_SERVICE
+    readOnlyRootFilesystem: true
+    runAsGroup: 12345
+    runAsNonRoot: true
+    runAsUser: 12345
+    seccompProfile:
+      type: RuntimeDefault
+
+isolation:
+  enabled: true
+
+  podSecurityStandard: restricted
+  resourceQuota:
+    enabled: false
+  limitRange:
+    enabled: false
+
+  networkPolicy:
+    enabled: true
+
+    zeroTrust:
+      enabled: false
+
+    incomingConnections:
+      vclusterAllow:
+        enabled: true
+
+    outgoingConnections:
+      ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+          - 100.64.0.0/10
+          - 127.0.0.0/8
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16

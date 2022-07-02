@@ -344,6 +344,13 @@ isolation:
 
   networkPolicy:
     enabled: true
+    incomingConnections:
+      # Allow incoming connections to vcluster API
+      vclusterAllow:
+        enabled: true
+        ipBlock:
+          cidr: 0.0.0.0/0
+          except: {}
     outgoingConnections:
       ipBlock:
         cidr: 0.0.0.0/0
