@@ -3,9 +3,9 @@ kind: FelixConfiguration
 metadata:
   name: default
 spec:
-  bpfEnabled: true
-  bpfLogLevel: ""
-  bpfExternalServiceMode: DSR
+#  bpfEnabled: true
+#  bpfLogLevel: ""
+#  bpfExternalServiceMode: DSR
   ipipEnabled: true
   logSeverityScreen: Info
   reportingInterval: 0s
@@ -14,3 +14,5 @@ spec:
   # is enabled. However here we use same service CIDR on all host clusters
   # in purpose which why we need to disable
   serviceLoopPrevention: Disabled
+  allowVXLANPacketsFromWorkloads: true
+

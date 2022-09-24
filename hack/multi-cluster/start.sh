@@ -3,19 +3,19 @@
 echo
 echo "Creating clusters"
 kind create cluster --config kind-cluster1.yaml
-kubectl --context kind-host-cluster-1 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
+kubectl --context kind-host-cluster-1 apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
 
 kind create cluster --config kind-cluster2.yaml
-kubectl --context kind-host-cluster-2 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
+kubectl --context kind-host-cluster-2 apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
 
 kind create cluster --config kind-cluster3.yaml
-kubectl --context kind-host-cluster-3 apply -f https://docs.projectcalico.org/v3.22/manifests/calico.yaml
+kubectl --context kind-host-cluster-3 apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
 
 kubectl --context kind-host-cluster-1 apply -f calico-felix-config.yaml
 kubectl --context kind-host-cluster-2 apply -f calico-felix-config.yaml
 kubectl --context kind-host-cluster-3 apply -f calico-felix-config.yaml
 
-./bpf.sh
+# ./bpf.sh
 
 echo
 echo "Setting global BGP configuration to Calico"
