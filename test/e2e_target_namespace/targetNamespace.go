@@ -48,7 +48,7 @@ var _ = ginkgo.Describe("Target Namespace", func() {
 			LabelSelector: "vcluster.loft.sh/managed-by=" + f.VclusterName,
 		})
 		framework.ExpectNoError(err)
-		framework.ExpectEqual(true, len(p.Items) > 0)
+		framework.ExpectEqual(true, len(p.Items) > 1)
 
 		ginkgo.By("Check if OwnerReferences is set to pod")
 		framework.ExpectEqual(*p.Items[0].OwnerReferences[0].Controller, true)
