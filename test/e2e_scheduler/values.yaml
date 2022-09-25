@@ -1,6 +1,0 @@
-sync:
-  nodes:
-    enabled: true
-    enableScheduler: true
-    # Either syncAllNodes or nodeSelector is required
-    syncAllNodes: true

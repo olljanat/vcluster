@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("Target Namespace", func() {
 		_, err := f.VclusterClient.CoreV1().Pods("default").Create(f.Context, pod, metav1.CreateOptions{})
 		framework.ExpectNoError(err)
 
-		err = wait.Poll(time.Second, time.Minute*2, func() (bool, error) {
+		err = wait.Poll(time.Second, time.Minute*5, func() (bool, error) {
 			p, _ := f.VclusterClient.CoreV1().Pods("default").Get(f.Context, "nginx", metav1.GetOptions{})
 			if p.Status.Phase == corev1.PodRunning {
 				return true, nil
@@ -51,7 +51,7 @@ var _ = ginkgo.Describe("Target Namespace", func() {
 		framework.ExpectEqual(true, len(p.Items) > 0)
 
 		ginkgo.By("Check if OwnerReferences is set to pod")
-		framework.ExpectEqual(&p.Items[0].OwnerReferences[0].Controller, true)
+		framework.ExpectEqual(*p.Items[0].OwnerReferences[0].Controller, true)
 
 		ginkgo.By("Check if networkpolicy is created to target namespace")
 		_, err = f.HostClient.NetworkingV1().NetworkPolicies("vcluster-workload").Get(f.Context, "vcluster-workloads", metav1.GetOptions{})
