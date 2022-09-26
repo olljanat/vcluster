@@ -19,14 +19,6 @@ You can substitute the runAsUser value as needed, e.g. if the host cluster limit
 And you are free to set other [securityContext fields](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#podsecuritycontext-v1-core) as necessary to fulfill your host cluster policies.
 :::
 
-:::caution
-Running as non-root is currently supported only for the k3s distribution. While [other distributions provided by vcluster](./other-distributions) may make use of the `securityContext` field from the `values.yaml` file, we do not guarantee that they will work as expected.
-:::
-
-:::caution
-vcluster doesn't currently provide a migration path from an instance that was running as root to running with a non-root user.
-:::
-
 ## Running on OpenShift
 By default, OpenShift doesn't allow running containers with the root user, but it assigns a random UID from the allowed range automatically, which means that you can skip the steps described in the [Running as non-root user](#running-as-non-root-user) section of this document and your vcluster should run as non-root user by default.
 
