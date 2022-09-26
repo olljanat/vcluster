@@ -134,6 +134,12 @@ jobs:
         kind load image-archive vcluster_syncer
 
         chmod +x vcluster && sudo mv vcluster /usr/bin
+
+        if [[ "${{ matrix.test-suite-path }}" == "./test/e2e_rootless" ]]; then
+          echo "Enforcing Pod Security Standard 'restricted' to namespace ${{ env.VCLUSTER_NAMESPACE }}"
+          kubectl create namespace ${{ env.VCLUSTER_NAMESPACE }}
+          kubectl label namespace ${{ env.VCLUSTER_NAMESPACE }} pod-security.kubernetes.io/enforce=restricted
+        fi
         
         vcluster create ${{ env.VCLUSTER_SUFFIX }} -n ${{ env.VCLUSTER_NAMESPACE }} \
         --create-namespace \
